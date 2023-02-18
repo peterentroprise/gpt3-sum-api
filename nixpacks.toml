@@ -1,2 +1,2 @@
 [phases.setup]
-aptPkgs = ["...", "libsndfile1"]   # Install the wget package with apt-get
+aptPkgs = ["...", "libsndfile1", "libsndfile1-dev]

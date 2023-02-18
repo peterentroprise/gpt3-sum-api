@@ -1,5 +1,5 @@
 from fastapi import FastAPI, File, UploadFile
-from pydantic import BaseModel
+from pydantic import BaseSettings
 from fastapi.middleware.cors import CORSMiddleware
 import torch
 import io
@@ -9,6 +9,17 @@ from pyannote.core import Segment
 from scipy.spatial.distance import cdist
 import moviepy.editor as mp
 import shutil
+
+class Settings(BaseSettings):
+    class Config:
+        env_file = ".env"
+
+def get_settings():
+    return Settings()
+
+api = get_settings()
+print("api")
+print(api)
 
 model = PretrainedSpeakerEmbedding(
     "speechbrain/spkrec-ecapa-voxceleb",
