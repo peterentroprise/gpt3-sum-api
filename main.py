@@ -2,7 +2,7 @@ from fastapi import FastAPI, File, UploadFile
 from pydantic import BaseSettings
 from fastapi.middleware.cors import CORSMiddleware
 import torch
-import io
+import requests
 from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
 from pyannote.audio import Audio
 from pyannote.core import Segment
@@ -11,15 +11,12 @@ import moviepy.editor as mp
 import shutil
 
 class Settings(BaseSettings):
+    eleven_labs_api_key: str
     class Config:
         env_file = ".env"
 
 def get_settings():
     return Settings()
-
-api = get_settings()
-print("api")
-print(api)
 
 model = PretrainedSpeakerEmbedding(
     "speechbrain/spkrec-ecapa-voxceleb",
@@ -48,6 +45,45 @@ async def root():
 
 @app.post("/uploadfile/")
 async def create_upload_file(file: UploadFile):
+
+    def get_voices():
+        config = get_settings()
+        url = 'https://api.elevenlabs.io/v1/voices'
+        params = {'xi-api-key': config.eleven_labs_api_key}
+
+        response = requests.get(url, params=params)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return 'Error: ' + str(response.status_code)
+
+    voices = get_voices()
+    print(voices)
+
+    def text_to_speech():
+        config = get_settings()
+        url = 'https://api.elevenlabs.io/v1/voices'
+        params = {'xi-api-key': config.eleven_labs_api_key, "voice_id": "21m00Tcm4TlvDq8ikWAM"}
+        body = {
+            "text": "hello universe take me there",
+            "voice_settings": {
+                "stability": 0,
+                "similarity_boost": 0
+            }
+        }
+
+        response = requests.get(url, params=params, json=body)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(response.json())
+            return 'Error: ' + str(response.status_code)
+
+
+    audio = text_to_speech()
+    print(audio)
 
     with open("tempVideo.webm", "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
