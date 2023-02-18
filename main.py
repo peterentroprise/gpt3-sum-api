@@ -1,5 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseSettings
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
 import torch
 import requests
@@ -9,6 +11,9 @@ from pyannote.core import Segment
 from scipy.spatial.distance import cdist
 import moviepy.editor as mp
 import shutil
+
+class SynthesizedAudioInput(BaseModel):
+    text: str
 
 class Settings(BaseSettings):
     eleven_labs_api_key: str
@@ -42,16 +47,14 @@ app.add_middleware(
 async def root():
     return {"message": "Hello Universe."}
 
-
-@app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile):
-
+@app.post("/synthesizeAudio/")
+async def synthesize_audio(input: SynthesizedAudioInput):
     def get_voices():
         config = get_settings()
         url = 'https://api.elevenlabs.io/v1/voices'
-        params = {'xi-api-key': config.eleven_labs_api_key}
+        headers = {'xi-api-key': "b80ce6ad1a3013b0e0eb0f159262a724"}
 
-        response = requests.get(url, params=params)
+        response = requests.get(url, headers=headers)
 
         if response.status_code == 200:
             return response.json()
@@ -61,29 +64,34 @@ async def create_upload_file(file: UploadFile):
     voices = get_voices()
     print(voices)
 
-    def text_to_speech():
+    def text_to_speech(text):
         config = get_settings()
-        url = 'https://api.elevenlabs.io/v1/voices'
-        params = {'xi-api-key': config.eleven_labs_api_key, "voice_id": "21m00Tcm4TlvDq8ikWAM"}
+        url = 'https://api.elevenlabs.io/v1/text-to-speech/WgvsZ0EcMaJGcVgMkzSc'
+        headers = {'xi-api-key': "b80ce6ad1a3013b0e0eb0f159262a724", 'Accept': 'audio/mpeg'}
         body = {
-            "text": "hello universe take me there",
+            "text": text,
             "voice_settings": {
-                "stability": 0,
-                "similarity_boost": 0
+                "stability": 1,
+                "similarity_boost": 1
             }
         }
 
-        response = requests.get(url, params=params, json=body)
+        response = requests.post(url, headers=headers, json=body)
 
         if response.status_code == 200:
-            return response.json()
+            with open('synthesizedAudio.mp3', 'wb') as f:
+                f.write(response.content)
         else:
-            print(response.json())
+            print()
             return 'Error: ' + str(response.status_code)
 
+    text_to_speech(input.text)
+    return FileResponse("synthesizedAudio.mp3", media_type='audio/mpeg')
 
-    audio = text_to_speech()
-    print(audio)
+
+@app.post("/uploadfile/")
+async def create_upload_file(file: UploadFile):
+
 
     with open("tempVideo.webm", "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
@@ -105,3 +113,4 @@ async def create_upload_file(file: UploadFile):
     distanceNumber = distance[0][0]
 
     return {"filename": file.filename, "distance": distanceNumber}
+ 
