@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+tempAudio.wav
+tempVideo.webm
+
 # C extensions
 *.so
 
