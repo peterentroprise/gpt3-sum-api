@@ -16,7 +16,7 @@ watchfiles==0.16.1
 websockets==10.3
 python-multipart==0.0.5
 torch
-torchvision
+torchvision==0.2.2
 torchaudio
 torchtext
 pyannote.audio==2.1.1
