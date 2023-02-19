@@ -41,7 +41,7 @@ def get_settings():
 app = FastAPI()
 
 origins = [
-    "gpt3-sum.vercel.app",
+    "https://gpt3-sum.vercel.app",
     "http://localhost",
     "http://localhost:3000",
 ]
