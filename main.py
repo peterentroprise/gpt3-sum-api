@@ -235,7 +235,7 @@ async def generateTranscript(file: UploadFile):
     
     def transcribe_audio(audio_url):
         endpoint = "https://api.assemblyai.com/v2/transcript"
-        json = { "audio_url": audio_url }
+        json = { "audio_url": audio_url, "speaker_labels": True, "sentiment_analysis": True }
         headers = {
             "authorization": config.aai_api_key,
         }
