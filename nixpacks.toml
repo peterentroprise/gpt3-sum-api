@@ -3,4 +3,4 @@ nixPkgs = ["...", "ffmpeg"]
 aptPkgs = ["...", "libsndfile1"]
 
 [phases.build]
-cmds = ["apt-get update && apt-get install -y libsndfile1" && apt-get install -y libsndfile1-dev", "..."]
+cmds = ["sudo apt-get update && sudo apt-get install -y libsndfile1 && sudo apt-get install -y libsndfile1-dev", "..."]
