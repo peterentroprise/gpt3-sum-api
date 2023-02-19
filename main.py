@@ -7,13 +7,15 @@ import requests
 import shutil
 import os
 
-# import ffmpeg
-# import torch
+import ffmpeg
+import torch
+from scipy.spatial.distance import cdist
+# import moviepy.editor as mp
+
 # from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
 # from pyannote.audio import Audio
 # from pyannote.core import Segment
-# from scipy.spatial.distance import cdist
-# import moviepy.editor as mp
+
 # model = PretrainedSpeakerEmbedding(
 #     "speechbrain/spkrec-ecapa-voxceleb",
 #     device=torch.device("cuda"))
