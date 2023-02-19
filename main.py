@@ -18,6 +18,8 @@ import os
 class SynthesizedAudioInput(BaseModel):
     text: str
     voiceId: str
+    stability: int
+    similarity: int
 
 class Settings(BaseSettings):
     eleven_labs_api_key: str
@@ -112,15 +114,15 @@ async def get_all_voices():
 
 @app.post("/synthesizeAudio/")
 async def synthesize_audio(input: SynthesizedAudioInput):
-    def text_to_speech(voiceId, text):
+    def text_to_speech(voiceId, text, stability, similarity):
         config = get_settings()
         url = "https://api.elevenlabs.io/v1/text-to-speech/%s" % (voiceId)
         headers = {'xi-api-key': config.eleven_labs_api_key, 'Accept': 'audio/mpeg'}
         body = {
             "text": text,
             "voice_settings": {
-                "stability": 1,
-                "similarity_boost": 1
+                "stability": stability,
+                "similarity_boost": similarity
             }
         }
 
@@ -133,7 +135,7 @@ async def synthesize_audio(input: SynthesizedAudioInput):
             print()
             return 'Error: ' + str(response.status_code)
 
-    text_to_speech(input.voiceId, input.text)
+    text_to_speech(input.voiceId, input.text, input.stability, input.similarity)
     return FileResponse("synthesizedAudio.mp3", media_type='audio/mpeg')
 
 
