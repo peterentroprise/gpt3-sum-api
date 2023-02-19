@@ -55,6 +55,37 @@ async def root():
     return {"message": "Hello Universe."}
 
 
+@app.post("/deleteAllVoices/")
+async def get_all_voices():
+    def get_voices():
+        config = get_settings()
+        url = 'https://api.elevenlabs.io/v1/voices'
+        headers = {'xi-api-key': config.eleven_labs_api_key}
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return 'Error: ' + str(response.status_code)
+
+    def delete_voice(voice_id):
+            config = get_settings()
+            url = 'https://api.elevenlabs.io/v1/voices/' + voice_id
+            headers = {'xi-api-key': config.eleven_labs_api_key}
+
+            response = requests.delete(url, headers=headers)
+
+            if response.status_code == 200:
+                return response.json()
+            else:
+                return 'Error: ' + str(response.status_code)
+
+    voices = get_voices()
+    print(voices)
+
+    return voices
+
 @app.get("/getAllVoices/")
 async def get_all_voices():
     def get_voices():
