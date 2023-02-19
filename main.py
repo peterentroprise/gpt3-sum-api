@@ -54,8 +54,9 @@ async def root():
     print(config.eleven_labs_api_key)
     return {"message": "Hello Universe."}
 
-@app.post("/synthesizeAudio/")
-async def synthesize_audio(input: SynthesizedAudioInput):
+
+@app.post("/getAllVoices/")
+async def get_all_voices():
     def get_voices():
         config = get_settings()
         url = 'https://api.elevenlabs.io/v1/voices'
@@ -71,6 +72,11 @@ async def synthesize_audio(input: SynthesizedAudioInput):
     voices = get_voices()
     print(voices)
 
+    return voices
+
+
+@app.post("/synthesizeAudio/")
+async def synthesize_audio(input: SynthesizedAudioInput):
     def text_to_speech(voiceId, text):
         config = get_settings()
         url = "https://api.elevenlabs.io/v1/text-to-speech/%s" % (voiceId)
