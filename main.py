@@ -55,7 +55,7 @@ async def root():
     return {"message": "Hello Universe."}
 
 
-@app.post("/getAllVoices/")
+@app.get("/getAllVoices/")
 async def get_all_voices():
     def get_voices():
         config = get_settings()
