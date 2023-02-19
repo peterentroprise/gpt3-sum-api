@@ -12,6 +12,7 @@ from scipy.spatial.distance import cdist
 import moviepy.editor as mp
 import shutil
 import ffmpeg
+import os
 
 
 class SynthesizedAudioInput(BaseModel):
@@ -20,6 +21,7 @@ class SynthesizedAudioInput(BaseModel):
 
 class Settings(BaseSettings):
     eleven_labs_api_key: str
+    aai_api_key: str
     class Config:
         env_file = ".env"
 
@@ -48,6 +50,8 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
+    config = get_settings()
+    print(config.eleven_labs_api_key)
     return {"message": "Hello Universe."}
 
 @app.post("/synthesizeAudio/")
@@ -55,7 +59,7 @@ async def synthesize_audio(input: SynthesizedAudioInput):
     def get_voices():
         config = get_settings()
         url = 'https://api.elevenlabs.io/v1/voices'
-        headers = {'xi-api-key': "b80ce6ad1a3013b0e0eb0f159262a724"}
+        headers = {'xi-api-key': config.eleven_labs_api_key}
 
         response = requests.get(url, headers=headers)
 
@@ -70,7 +74,7 @@ async def synthesize_audio(input: SynthesizedAudioInput):
     def text_to_speech(voiceId, text):
         config = get_settings()
         url = "https://api.elevenlabs.io/v1/text-to-speech/%s" % (voiceId)
-        headers = {'xi-api-key': "b80ce6ad1a3013b0e0eb0f159262a724", 'Accept': 'audio/mpeg'}
+        headers = {'xi-api-key': config.eleven_labs_api_key, 'Accept': 'audio/mpeg'}
         body = {
             "text": text,
             "voice_settings": {
@@ -94,30 +98,40 @@ async def synthesize_audio(input: SynthesizedAudioInput):
 
 @app.post("/trainModel/")
 async def train_model(file: UploadFile):
-    name = file.filename
+    original_name = file.filename
 
-    print(name)
+    name_split = os.path.splitext(original_name)
+    file_name = "trainModelVideo"
+    file_extension = name_split[1]
 
-    with open(name, "wb") as buffer:
+    modified_name = file_name + file_extension
+
+    with open(modified_name, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-    input_stream = ffmpeg.input(name)
-    output_stream = ffmpeg.output(input_stream, "trainModelVideo.mp4")
-    ffmpeg.run(output_stream, overwrite_output=True)
-    video_clip = mp.VideoFileClip("trainModelVideo.mp4")
+    if(file_extension == ".webm"):
+        mp4_name = file_name + ".mp4"
+        input_stream = ffmpeg.input(modified_name)
+        output_stream = ffmpeg.output(input_stream, mp4_name)
+        ffmpeg.run(output_stream, overwrite_output=True)
+        os.remove(modified_name)
+        modified_name = mp4_name
+       
+    video_clip = mp.VideoFileClip(modified_name)
     video_clip.audio.write_audiofile(r"trainModelAudio.mp3")
+    os.remove(modified_name)
 
-    def voice_add(file_path, name):
+    def voice_add(file_path, original_name):
         config = get_settings()
         url = "https://api.elevenlabs.io/v1/voices/add"
 
-        payload={'name': name, 'labels': ''}
+        payload={'name': original_name, 'labels': ''}
 
         files=[('files',(file_path,open(file_path,'rb'),'audio/mpeg'))]
 
         headers = {
         'accept': 'application/json',
-        'xi-api-key': 'b80ce6ad1a3013b0e0eb0f159262a724'
+        'xi-api-key': config.eleven_labs_api_key
         }
 
         response = requests.request("POST", url, headers=headers, data=payload, files=files)
@@ -126,26 +140,38 @@ async def train_model(file: UploadFile):
             return response.json()
         else:
             print('Error: ' + str(response.status_code))
-            # return 'Error: ' + str(response.status_code) 
 
-    api_response = voice_add("trainModelAudio.mp3", name)
+    api_response = voice_add("trainModelAudio.mp3", original_name)
+    os.remove("trainModelAudio.mp3")
 
     return {"voiceId": api_response.get("voice_id")}
 
 @app.post("/generateTranscript/")
 async def generateTranscript(file: UploadFile):
-    name = file.filename
+    config = get_settings()
+    original_name = file.filename
 
-    print(name)
+    name_split = os.path.splitext(original_name)
+    file_name = "trainModelVideo"
+    file_extension = name_split[1]
 
-    with open(name, "wb") as buffer:
+    modified_name = file_name + file_extension
+
+    with open(modified_name, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-    input_stream = ffmpeg.input(name)
-    output_stream = ffmpeg.output(input_stream, "trainModelVideo.mp4")
-    ffmpeg.run(output_stream, overwrite_output=True)
-    video_clip = mp.VideoFileClip("trainModelVideo.mp4")
+    if(file_extension == ".webm"):
+        mp4_name = file_name + ".mp4"
+        input_stream = ffmpeg.input(modified_name)
+        output_stream = ffmpeg.output(input_stream, mp4_name)
+        ffmpeg.run(output_stream, overwrite_output=True)
+        os.remove(modified_name)
+        modified_name = mp4_name
+
+
+    video_clip = mp.VideoFileClip(modified_name)
     video_clip.audio.write_audiofile(r"trainModelAudio.mp3")
+    os.remove(modified_name)
 
     def upload_audio(filename):
         def read_file(filename, chunk_size=5242880):
@@ -156,7 +182,7 @@ async def generateTranscript(file: UploadFile):
                         break
                     yield data
 
-        headers = {'authorization': "7fdf42ab12b54f909316cb2e2897788c"}
+        headers = {'authorization': config.aai_api_key}
         response = requests.post('https://api.assemblyai.com/v2/upload',
                                 headers=headers,
                                 data=read_file(filename))
@@ -168,7 +194,7 @@ async def generateTranscript(file: UploadFile):
         endpoint = "https://api.assemblyai.com/v2/transcript"
         json = { "audio_url": audio_url }
         headers = {
-            "authorization": "7fdf42ab12b54f909316cb2e2897788c",
+            "authorization": config.aai_api_key,
         }
         response = requests.post(endpoint, json=json, headers=headers)
         print(response.json())
@@ -178,6 +204,7 @@ async def generateTranscript(file: UploadFile):
 
     audio_url = upload_audio("trainModelAudio.mp3")
     transcript_response = transcribe_audio(audio_url.get("upload_url"))
+    os.remove("trainModelAudio.mp3")
     print(transcript_response)
     return {"transcriptPollingId": transcript_response.get("id")}
  
