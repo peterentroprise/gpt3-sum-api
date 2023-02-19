@@ -3,17 +3,20 @@ from fastapi.responses import FileResponse
 from pydantic import BaseSettings
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import torch
 import requests
-from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
-from pyannote.audio import Audio
-from pyannote.core import Segment
-from scipy.spatial.distance import cdist
-import moviepy.editor as mp
 import shutil
-import ffmpeg
 import os
 
+# import ffmpeg
+# import torch
+# from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
+# from pyannote.audio import Audio
+# from pyannote.core import Segment
+# from scipy.spatial.distance import cdist
+# import moviepy.editor as mp
+# model = PretrainedSpeakerEmbedding(
+#     "speechbrain/spkrec-ecapa-voxceleb",
+#     device=torch.device("cuda"))
 
 class SynthesizedAudioInput(BaseModel):
     text: str
@@ -30,9 +33,7 @@ class Settings(BaseSettings):
 def get_settings():
     return Settings()
 
-model = PretrainedSpeakerEmbedding(
-    "speechbrain/spkrec-ecapa-voxceleb",
-    device=torch.device("cuda"))
+
 
 app = FastAPI()
 
