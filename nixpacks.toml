@@ -6,5 +6,5 @@ aptPkgs = ["..."]
 cmds = ["..."]
 
 [phases.fix]
-cmds = ["apt-get update && apt-get install -y libsndfile1"]
+cmds = ["apt-get update && sudo apt-get install -y libsndfile1 libsndfile1-dev"]
 dependsOn = ["build"]
