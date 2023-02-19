@@ -1,3 +1,3 @@
 [phases.setup]
-nixPkgs = ["...", "ffmpeg", "python311Packages.soundfile"]
-aptPkgs = ["..."]
+nixPkgs = ["...", "ffmpeg"]
+aptPkgs = ["...", "libsndfile1"]

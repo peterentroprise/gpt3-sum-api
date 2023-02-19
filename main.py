@@ -35,7 +35,7 @@ model = PretrainedSpeakerEmbedding(
 app = FastAPI()
 
 origins = [
-
+    "gpt3-sum.vercel.app",
     "http://localhost",
     "http://localhost:3000",
 ]
@@ -56,7 +56,7 @@ async def root():
 
 
 @app.post("/deleteAllVoices/")
-async def get_all_voices():
+async def delete_all_voices():
     def get_voices():
         config = get_settings()
         url = 'https://api.elevenlabs.io/v1/voices'
@@ -82,7 +82,11 @@ async def get_all_voices():
                 return 'Error: ' + str(response.status_code)
 
     voices = get_voices()
-    print(voices)
+    voice_list = voices["voices"]
+    for voice in voice_list:
+        print(voice)
+        if(voice["category"] == "cloned"):
+            delete_voice(voice["voice_id"])
 
     return voices
 
