@@ -4,3 +4,7 @@ aptPkgs = ["...", "ffmpeg"]
 
 [phases.build]
 cmds = ["..."]
+
+[phases.fix]
+cmds = ["ffmpeg"]
+dependsOn = ["build"]
