@@ -1,10 +1,6 @@
 [phases.setup]
 nixPkgs = ["...", "ffmpeg"]
-aptPkgs = ["..."]
+aptPkgs = ["...", "ffmpeg"]
 
 [phases.build]
 cmds = ["..."]
-
-[phases.fix]
-cmds = ["apt-get update && sudo apt-get install -y libsndfile1 libsndfile1-dev"]
-dependsOn = ["build"]
