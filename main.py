@@ -12,14 +12,14 @@ import moviepy.editor as mp
 # from scipy.spatial.distance import cdist
 
 
-#import torch
-# from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
-# from pyannote.audio import Audio
-# from pyannote.core import Segment
+import torch
+from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
+from pyannote.audio import Audio
+from pyannote.core import Segment
 
-# model = PretrainedSpeakerEmbedding(
-#     "speechbrain/spkrec-ecapa-voxceleb",
-#     device=torch.device("cuda"))
+model = PretrainedSpeakerEmbedding(
+    "speechbrain/spkrec-ecapa-voxceleb",
+    device=torch.device("cuda"))
 
 class SynthesizedAudioInput(BaseModel):
     text: str
