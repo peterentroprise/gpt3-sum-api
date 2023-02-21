@@ -1,16 +1,16 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseSettings
 from pydantic import BaseModel
-from fastapi.middleware.cors import CORSMiddleware
+
 import requests
 import shutil
 import os
-
 import ffmpeg
-
-from scipy.spatial.distance import cdist
 import moviepy.editor as mp
+from scipy.spatial.distance import cdist
+
 
 #import torch
 # from pyannote.audio.pipelines.speaker_verification import PretrainedSpeakerEmbedding
