@@ -12,6 +12,11 @@ moviepy = "^1.0.3"
 ffmpeg-python = "^0.2.0"
 uvicorn = "^0.20.0"
 python-multipart = "^0.0.5"
+torch = "^1.13.1"
+torchvision = "^0.14.1"
+torchaudio = "^0.13.1"
+torchtext = "^0.14.1"
+pyannote-audio = "^2.1.1"
 
 
 [build-system]
