@@ -9,7 +9,7 @@ import shutil
 import os
 import ffmpeg
 import moviepy.editor as mp
-from scipy.spatial.distance import cdist
+# from scipy.spatial.distance import cdist
 
 
 #import torch
