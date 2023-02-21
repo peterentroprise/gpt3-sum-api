@@ -1,6 +1,6 @@
 [phases.setup]
 nixPkgs = ["...", "ffmpeg"]
-aptPkgs = ["...", "libsndfile1"]
+aptPkgs = ["...", "libsndfile1", "libsndfile1-dev"]
 
 [phases.build]
 cmds = ["..."]
